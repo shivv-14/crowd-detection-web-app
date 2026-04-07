@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CrowdAI • Intelligent Crowd Density Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+        :root {
+            --bg:        #F1F5F9;
+            --primary:    #1E1B4B;
+            --low:        #10B981;
+            --medium:     #F59E0B;
+            --high:       #EF4444;
+            --secondary:  #64748B;
+            --text:       #1E1B4B;
+            --text-light: #475569;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .logo-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .drop-zone {
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .drop-zone.active {
+            border-color: var(--low);
+            background: rgba(16, 185, 129, 0.08);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+        }
+
+        .result-card {
+            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.96) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .density-low    { background: var(--low);    }
+        .density-medium { background: var(--medium); }
+        .density-high   { background: var(--high);   }
+    </style>
+</head>
+<body class="min-h-screen antialiased">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 border-b border-gray-200/70 bg-white/70 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[var(--primary)] text-white flex items-center justify-center text-2xl shadow-lg shadow-[var(--primary)]/30">
+                    👥
+                </div>
+                <span class="logo-font text-3xl font-bold tracking-tight text-[var(--primary)]">
+                    Crowd<span class="text-[var(--low)]">AI</span>
+                </span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--secondary)]">
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">How it Works</a>
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">Examples</a>
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">API</a>
+            </div>
+
+            <button onclick="location.reload()" 
+                    class="px-6 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium rounded-xl transition-all shadow-md shadow-[var(--primary)]/20">
+                New Analysis
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 pt-16 pb-24">
+
+        <!-- Hero -->
+        <div class="text-center max-w-4xl mx-auto mb-16">
+            <div class="inline-flex items-center gap-2 bg-white/80 text-[var(--low)] text-xs font-mono tracking-wider px-5 py-2 rounded-full mb-6 shadow-sm">
+                REAL-TIME • YOLO POWERED
+            </div>
+            <h1 class="text-6xl sm:text-7xl font-bold tracking-tight logo-font leading-tight mb-5">
+                Crowd Density<br>
+                <span class="text-[var(--low)]">Intelligence</span>
+            </h1>
+            <p class="text-xl text-[var(--text-light)] max-w-2xl mx-auto leading-relaxed">
+                Upload any photo — get accurate people count and density classification in seconds.
+            </p>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="max-w-3xl mx-auto">
+            <div class="glass border border-gray-200/60 rounded-3xl p-10 lg:p-14 shadow-xl shadow-gray-200/40">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+
+                    <div id="dropZone" 
+                         class="drop-zone border-3 border-dashed border-gray-300 hover:border-[var(--low)] rounded-3xl p-16 text-center cursor-pointer transition-all">
+                        
+                        <div class="mx-auto w-24 h-24 bg-[var(--low)]/10 rounded-3xl flex items-center justify-center mb-6">
+                            <svg class="w-14 h-14 text-[var(--low)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                        </div>
+
+                        <h3 class="text-2xl font-semibold text-[var(--primary)] mb-2">Drop your image here</h3>
+                        <p class="text-[var(--secondary)] mb-8">or click to browse • JPG, PNG, WEBP</p>
+
+                        <label for="image" 
+                               class="inline-flex items-center gap-3 bg-[var(--primary)] hover:bg-[var(--primary)]/95 text-white font-semibold text-lg px-10 py-5 rounded-2xl cursor-pointer shadow-lg shadow-[var(--primary)]/25 transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v-4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                            CHOOSE FILE
+                        </label>
+
+                        <input type="file" id="image" name="image" accept="image/*" required class="hidden" />
+                    </div>
+
+                    <!-- Preview -->
+                    <div id="previewContainer" class="hidden mt-10">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm font-medium text-[var(--secondary)]">PREVIEW</span>
+                            <button type="button" onclick="clearPreview()" 
+                                    class="text-sm text-[var(--high)] hover:text-red-700 flex items-center gap-1">
+                                × Remove
+                            </button>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-inner bg-white">
+                            <img id="previewImg" class="w-full h-auto max-h-[420px] object-contain mx-auto">
+                        </div>
+                        <p id="fileName" class="text-center text-xs text-[var(--secondary)] mt-3 font-mono break-all"></p>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" id="submitBtn"
+                            class="mt-12 w-full bg-[var(--primary)] hover:bg-[var(--primary)]/95 text-white font-semibold text-xl py-6 rounded-2xl transition-all shadow-xl shadow-[var(--primary)]/30 flex items-center justify-center gap-3 disabled:opacity-60">
+                            <span id="btnText">ANALYZE CROWD</span>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RESULT SECTION -->
+        {% if count %}
+        <div class="max-w-4xl mx-auto mt-20 result-card">
+
+            <div class="glass border border-gray-200/60 rounded-3xl overflow-hidden shadow-2xl shadow-gray-300/30">
+
+                <!-- Header + Count -->
+                <div class="px-10 py-8 bg-white/80 border-b border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-[var(--low)] text-white flex items-center justify-center text-3xl shadow-lg">
+                            ✅
+                        </div>
+                        <div>
+                            <p class="text-xs font-mono tracking-wide text-[var(--secondary)]">ANALYSIS COMPLETE</p>
+                            <h2 class="text-3xl font-bold text-[var(--primary)]">Crowd Detected</h2>
+                        </div>
+                    </div>
+
+                    <div class="text-center sm:text-right">
+                        <div class="text-7xl font-extrabold text-[var(--primary)] count-number">{{ count }}</div>
+                        <p class="text-sm font-medium text-[var(--secondary)]">people</p>
+                    </div>
+                </div>
+
+                <!-- Image -->
+                <div class="p-8 lg:p-12 bg-gray-50/70">
+                    <div class="relative rounded-2xl overflow-hidden border border-gray-200 shadow-inner bg-black/40">
+                        <div id="viewer" class="relative overflow-auto rounded-2xl border border-gray-200 shadow-inner bg-black/40">
+
+    <div id="zoomContainer" class="relative inline-block">
+
+    <img id="crowdImage"
+         src="{{ image_path }}"
+         class="max-h-[680px] object-contain mx-auto select-none">
+
+    <!-- Bounding Boxes -->
+    {% for box in boxes %}
+    <div class="bbox"
+         style="
+         position: absolute;
+         left: {{ box.x }}px;
+         top: {{ box.y }}px;
+         width: {{ box.width }}px;
+         height: {{ box.height }}px;">
+         
+        <span class="label">{{ box.confidence }}%</span>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+</div>
+                        <div class="absolute top-5 right-5 bg-black/60 backdrop-blur-md text-white text-sm font-mono px-5 py-2 rounded-xl flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 bg-[var(--low)] rounded-full animate-pulse"></div>
+                            PROCESSED
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Density classification (you can make this dynamic later) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 border-t border-gray-200 text-center divide-x divide-gray-200">
+                    <div class="py-7">
+                        <p class="text-sm text-[var(--secondary)]">ESTIMATED DENSITY</p>
+                        <div class="mt-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[var(--low)]/10 text-[var(--low)] font-semibold">
+                            LOW
+                        </div>
+                    </div>
+                    <div class="py-7">
+                        <p class="text-sm text-[var(--secondary)]">CONFIDENCE</p>
+                        <p class="text-xl font-bold text-[var(--primary)]">97.4%</p>
+                    </div>
+                    <div class="py-7">
+                        <p class="text-sm text-[var(--secondary)]">PROCESSING TIME</p>
+                        <p class="text-xl font-bold text-[var(--primary)]">0.92s</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 mt-10 justify-center">
+                <button onclick="location.reload()" 
+                        class="flex-1 max-w-sm py-5 px-8 bg-white border border-gray-300 hover:border-gray-400 rounded-2xl font-medium transition-all">
+                    ANALYZE ANOTHER PHOTO
+                </button>
+                <button onclick="alert('Download coming soon')" 
+                        class="flex-1 max-w-sm py-5 px-8 bg-[var(--primary)] hover:bg-[var(--primary)]/95 text-white rounded-2xl font-medium transition-all shadow-lg shadow-[var(--primary)]/25 flex items-center justify-center gap-2">
+                    DOWNLOAD RESULT
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v-4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+        {% endif %}
+
+    </main>
+
+    <footer class="text-center py-12 text-sm text-[var(--secondary)] border-t border-gray-200/70">
+        CrowdAI • Professional Crowd Density Analysis • 2026
+    </footer>
+
+    <script>
+        const dropZone    = document.getElementById('dropZone');
+        const fileInput   = document.getElementById('image');
+        const previewCont = document.getElementById('previewContainer');
+        const previewImg  = document.getElementById('previewImg');
+        const fileNameEl  = document.getElementById('fileName');
+        const submitBtn   = document.getElementById('submitBtn');
+        const btnText     = document.getElementById('btnText');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
+
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+
+            fileNameEl.textContent = file.name.length > 36 ? file.name.slice(0,33)+'...' : file.name;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                previewImg.src = e.target.result;
+                previewCont.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearPreview() {
+            previewCont.classList.add('hidden');
+            fileInput.value = '';
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', () => {
+            submitBtn.disabled = true;
+            btnText.textContent = 'ANALYZING...';
+            submitBtn.innerHTML += `
+                <svg class="animate-spin ml-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            `;
+        });
+    </script>
+</body>
+</html>
