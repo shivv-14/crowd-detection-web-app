@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# virtual env
+venv/
+env/
+
+# uploads (important!)
+static/uploads/
+
+# model weights (if large)
+*.pt
+*.pth
+
+# system files
+.DS_Store
+
+static/uploads/
+*.pt
